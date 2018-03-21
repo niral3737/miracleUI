@@ -1,0 +1,11 @@
+.productEditBody {
+  text-align: center;
+}
+
+.productEditBody > div {
+  margin: 0.5rem 1rem;
+}
+
+.price {
+  display: inline;
+}
