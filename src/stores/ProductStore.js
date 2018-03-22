@@ -1,6 +1,7 @@
 import { observable, action, runInAction } from "mobx";
 import axios from "axios";
 import Validator from "validatorjs";
+import mainStore from "./MainStore";
 
 class ProductStore {
   @observable productList = null;
@@ -8,19 +9,20 @@ class ProductStore {
   @observable selectedProduct = null;
   @observable editForm = this.setNewForm();
   @observable productFilter = {};
+  @observable showDeleteConfirmation = false;
 
   @action
   onFieldChange = (field, value) => {
     this.editForm.fields[field].value = value;
-    let { productName, price, quantity } = this.editForm.fields;
+    let { name, price, quantity } = this.editForm.fields;
     var validation = new Validator(
       {
-        productName: productName.value,
+        name: name.value,
         price: price.value,
         quantity: quantity.value
       },
       {
-        productName: productName.rule,
+        name: name.rule,
         price: price.rule,
         quantity: quantity.rule
       }
@@ -37,7 +39,7 @@ class ProductStore {
   setNewForm = () => {
     return {
       fields: {
-        productName: {
+        name: {
           value: !this.selectedProduct ? "" : this.selectedProduct.name,
           error: null,
           rule: "required"
@@ -81,8 +83,8 @@ class ProductStore {
   };
 
   @action
-  closeModal = () => {
-    this.modal = false;
+  toggleDeleteConfirmation = () => {
+    this.showDeleteConfirmation = !this.showDeleteConfirmation;
   };
 
   @action
@@ -97,31 +99,58 @@ class ProductStore {
       "/webapi/product/get",
       this.productFilter
     );
-    runInAction(() => {
-      this.productList = response.data;
-    });
+    if (response.data.ok) {
+      runInAction(() => {
+        this.productList = response.data.payload;
+      });
+    } else {
+      console.log("There is some error");
+    }
   };
 
   @action
   saveProduct = async () => {
     let product = this.getProductFromEditForm();
     const response = await axios.post("webapi/product/set", product);
-    this.loadProductList(this.productFilter);
-    return response.data;
+    if (response.data.ok) {
+      this.loadProductList(this.productFilter);
+      if (!this.selectedProduct) {
+        mainStore.showSnackBar(`Product Created`);
+      } else {
+        mainStore.showSnackBar("Product Updated");
+      }
+      this.toggleModal();
+      this.resetForm();
+    } else {
+      response.data.payload.forEach(violation => {
+        this.editForm.fields[violation.dataFieldName].error =
+          violation.errorMessage;
+      });
+    }
   };
 
   @action
   removeProduct = async () => {
+    this.toggleDeleteConfirmation();
     if (this.selectedProduct) {
-      await axios.delete(`webapi/product/remove/${this.selectedProduct.id}`);
+      const response = await axios.delete(
+        `webapi/product/remove/${this.selectedProduct.id}`
+      );
+      if (response.data.ok) {
+        this.loadProductList(this.productFilter);
+        mainStore.showSnackBar("Product Deleted");
+        this.toggleModal();
+        this.resetForm();
+      } else {
+        this.editForm.meta.error = response.data.payload[0].errorMessage;
+      }
     }
-    this.loadProductList(this.productFilter);
   };
 
   getProductFromEditForm = () => {
     return {
       id: !this.selectedProduct ? 0 : this.selectedProduct.id,
-      name: this.editForm.fields.productName.value,
+      name: this.editForm.fields.name.value,
       hsnCode: this.editForm.fields.hsnCode.value,
       barcode: this.editForm.fields.barcode.value,
       location: this.editForm.fields.location.value,

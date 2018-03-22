@@ -9,3 +9,9 @@
 .price {
   display: inline;
 }
+
+.errorMessage {
+  margin-left: 5.5rem;
+  margin-top: 2rem;
+  color: red;
+}
