@@ -14,22 +14,6 @@ import { inject, observer } from "mobx-react";
 @inject("mainStore")
 @observer
 class Main extends Component {
-  state = {
-    currentTabTitle: "Invoices",
-    selectedTabIndex: 0
-  };
-  constructor(props) {
-    super(props);
-    this.setTabTitle = this.setTabTitle.bind(this);
-    this.setTabSelection = this.setTabSelection.bind(this);
-  }
-  setTabTitle(title) {
-    this.setState({ currentTabTitle: title });
-  }
-
-  setTabSelection(index) {
-    this.setState({ selectedTabIndex: index });
-  }
   componentDidMount() {
     this.onRouteChanged(this.props.location.pathname);
   }
@@ -41,21 +25,19 @@ class Main extends Component {
   }
 
   onRouteChanged(currentRoute) {
+    const { selectTab } = this.props.mainStore;
     switch (currentRoute) {
       case "/":
-        this.setTabTitle("Invoices");
-        this.setTabSelection(0);
+        selectTab(0);
         break;
       case "/customers":
-        this.setTabTitle("Customers");
-        this.setTabSelection(1);
+        selectTab(1);
         break;
       case "/products":
-        this.setTabTitle("Products");
-        this.setTabSelection(2);
+        selectTab(2);
         break;
       default:
-        this.setTabTitle("");
+        selectTab(0);
         break;
     }
   }
@@ -63,11 +45,14 @@ class Main extends Component {
     const {
       snackBarOpen,
       snackBarMessage,
-      hideSnackBar
+      hideSnackBar,
+      currentTabTitle,
+      selectedTabIndex,
+      selectTab
     } = this.props.mainStore;
     return (
       <div>
-        <ApplicationBar currentTabTitle={this.state.currentTabTitle} />
+        <ApplicationBar currentTabTitle={currentTabTitle} />
         <Switch>
           <Route exact path="/" component={InvoiceMain} />
           <Route path="/customers" component={CustomerMain} />
@@ -75,8 +60,8 @@ class Main extends Component {
           <Route component={NoMatch} />
         </Switch>
         <BottomNav
-          setTabSelection={this.setTabSelection}
-          selectedTabIndex={this.state.selectedTabIndex}
+          setTabSelection={selectTab}
+          selectedTabIndex={selectedTabIndex}
         />
         <Snackbar
           open={snackBarOpen}

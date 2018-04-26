@@ -1,8 +1,13 @@
 import React, { Component } from "react";
-import { FlatButton, Dialog } from "material-ui";
+import {
+  FlatButton,
+  Dialog,
+  SelectField,
+  MenuItem,
+  TextField
+} from "material-ui";
 import { observer, inject } from "mobx-react";
-import TextField from "material-ui/TextField";
-import "./productEdit.css";
+import "./product.css";
 import { textFieldErrorStyle } from "../../styles";
 import ProductDeleteConfirmationDialog from "./ProductDeleteConfirmationDialog";
 
@@ -13,11 +18,20 @@ class ProductEdit extends Component {
   constructor(props) {
     super(props);
     this.handleDelete = this.handleDelete.bind(this);
+    this.quantityRef = null;
+    this.nameRef = null;
   }
   async handleSubmit(e) {
     e.preventDefault();
     const { saveProduct } = this.props.productStore;
-    await saveProduct();
+    await saveProduct(false);
+  }
+
+  async handleSubmitAndAdd(e) {
+    e.preventDefault();
+    const { saveProduct } = this.props.productStore;
+    await saveProduct(true);
+    this.nameRef.focus();
   }
 
   handleCancel(e) {
@@ -42,21 +56,27 @@ class ProductEdit extends Component {
     } = this.props.productStore;
     const actions = [
       <FlatButton
-        label="Cancel"
+        label="Save and Add more"
         primary={true}
-        onClick={this.handleCancel.bind(this)}
+        disabled={!editForm.meta.isValid}
+        onClick={this.handleSubmitAndAdd.bind(this)}
       />,
       <FlatButton
-        label="Save"
+        label="Save and Close"
         primary={true}
         disabled={!editForm.meta.isValid}
         onClick={this.handleSubmit.bind(this)}
+      />,
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.handleCancel.bind(this)}
       />
     ];
 
     if (selectedProduct) {
       actions.splice(
-        1,
+        2,
         0,
         <FlatButton
           label="Delete"
@@ -72,60 +92,112 @@ class ProductEdit extends Component {
         actions={actions}
         modal={true}
         open={modal}
+        autoScrollBodyContent
       >
         <div className="productEditBody">
-          <TextField
-            name="name"
-            floatingLabelText="Product Name*"
-            value={editForm.fields.name.value}
-            errorText={editForm.fields.name.error}
-            errorStyle={textFieldErrorStyle}
-            onChange={e => onFieldChange(e.target.name, e.target.value)}
-          />
-          <span>₹</span>
-          <TextField
-            style={{ marginLeft: "0.2rem" }}
-            floatingLabelText="Price(₹)*"
-            type="number"
-            name="price"
-            value={editForm.fields.price.value}
-            errorText={editForm.fields.price.error}
-            errorStyle={textFieldErrorStyle}
-            onChange={e => onFieldChange(e.target.name, e.target.value)}
-          />
-          <TextField
-            floatingLabelText="Quantity*"
-            type="number"
-            name="quantity"
-            value={editForm.fields.quantity.value}
-            errorText={editForm.fields.quantity.error}
-            errorStyle={textFieldErrorStyle}
-            onChange={e => onFieldChange(e.target.name, e.target.value)}
-          />
-          <TextField
-            floatingLabelText="HSN code"
-            name="hsnCode"
-            value={editForm.fields.hsnCode.value}
-            errorText={editForm.fields.hsnCode.error}
-            errorStyle={textFieldErrorStyle}
-            onChange={e => onFieldChange(e.target.name, e.target.value)}
-          />
-          <TextField
-            floatingLabelText="Barcode"
-            name="barcode"
-            value={editForm.fields.barcode.value}
-            errorText={editForm.fields.barcode.error}
-            errorStyle={textFieldErrorStyle}
-            onChange={e => onFieldChange(e.target.name, e.target.value)}
-          />
-          <TextField
-            floatingLabelText="Location"
-            name="location"
-            value={editForm.fields.location.value}
-            errorText={editForm.fields.location.error}
-            errorStyle={textFieldErrorStyle}
-            onChange={e => onFieldChange(e.target.name, e.target.value)}
-          />
+          <h4>Product Details</h4>
+          <div>
+            <TextField
+              name="name"
+              autoFocus={true}
+              ref={input => {
+                this.nameRef = input;
+              }}
+              floatingLabelText="Product Name*"
+              value={editForm.fields.name.value}
+              errorText={editForm.fields.name.error}
+              errorStyle={textFieldErrorStyle}
+              onChange={e => onFieldChange(e.target.name, e.target.value)}
+            />
+            <TextField
+              floatingLabelText="Product Code*"
+              name="productCode"
+              value={editForm.fields.productCode.value}
+              errorText={editForm.fields.productCode.error}
+              errorStyle={textFieldErrorStyle}
+              onChange={e => onFieldChange(e.target.name, e.target.value)}
+            />
+            <TextField
+              floatingLabelText="Barcode"
+              name="barcode"
+              value={editForm.fields.barcode.value}
+              errorText={editForm.fields.barcode.error}
+              errorStyle={textFieldErrorStyle}
+              onChange={e => onFieldChange(e.target.name, e.target.value)}
+            />
+          </div>
+          <h4>Rate</h4>
+          <div>
+            <div>
+              <span>₹</span>
+              <TextField
+                style={{ marginLeft: "0.2rem" }}
+                floatingLabelText="Purchase Price(₹)"
+                type="number"
+                name="purchasePrice"
+                value={editForm.fields.purchasePrice.value}
+                errorText={editForm.fields.purchasePrice.error}
+                errorStyle={textFieldErrorStyle}
+                onChange={e => onFieldChange(e.target.name, e.target.value)}
+              />
+            </div>
+
+            <div>
+              <span>₹</span>
+              <TextField
+                style={{ marginLeft: "0.2rem" }}
+                floatingLabelText="Sales Price(₹)*"
+                type="number"
+                name="salesPrice"
+                value={editForm.fields.salesPrice.value}
+                errorText={editForm.fields.salesPrice.error}
+                errorStyle={textFieldErrorStyle}
+                onChange={e => onFieldChange(e.target.name, e.target.value)}
+              />
+            </div>
+            <SelectField
+              floatingLabelText="GST Slab"
+              value={editForm.fields.gstSlab.value}
+              errorText={editForm.fields.gstSlab.error}
+              errorStyle={textFieldErrorStyle}
+              onChange={(e, index, value) => {
+                e.preventDefault();
+                onFieldChange("gstSlab", value);
+                setTimeout(() => this.quantityRef.focus(), 100);
+              }}
+            >
+              <MenuItem value={"NONGST"} primaryText="Not Applicable" />
+              <MenuItem value={"GST5"} primaryText="5% GST" />
+              <MenuItem value={"GST12"} primaryText="12% GST" />
+              <MenuItem value={"GST18"} primaryText="18% GST" />
+              <MenuItem value={"GST28"} primaryText="28% GST" />
+              <MenuItem value={"GST3"} primaryText="3% GST" />
+              <MenuItem value={"GSTNILL"} primaryText="0% GST" />
+            </SelectField>
+          </div>
+          <h4>Inventory</h4>
+          <div>
+            <TextField
+              floatingLabelText="Quantity*"
+              type="number"
+              name="quantity"
+              ref={input => {
+                this.quantityRef = input;
+              }}
+              value={editForm.fields.quantity.value}
+              errorText={editForm.fields.quantity.error}
+              errorStyle={textFieldErrorStyle}
+              onChange={e => onFieldChange(e.target.name, e.target.value)}
+            />
+            <TextField
+              floatingLabelText="Location of product in shop"
+              name="location"
+              value={editForm.fields.location.value}
+              errorText={editForm.fields.location.error}
+              errorStyle={textFieldErrorStyle}
+              onChange={e => onFieldChange(e.target.name, e.target.value)}
+            />
+          </div>
         </div>
         <ProductDeleteConfirmationDialog
           open={showDeleteConfirmation}
