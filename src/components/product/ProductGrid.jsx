@@ -21,13 +21,19 @@ import { red500 } from "material-ui/styles/colors";
 @observer
 class ProductGrid extends Component {
   state = {
-    searchString: ""
+    searchString: this.props.productStore.productFilter.searchString
   };
   componentDidMount() {
     window.addEventListener("scroll", this.handleScroll.bind(this));
     const { loadProductList } = this.props.productStore;
     loadProductList();
   }
+
+  // uncomment this if we need to reset the search after tab change
+  // componentWillUnmount() {
+  //   const { resetProductFilter } = this.props.productStore;
+  //   // resetProductFilter();
+  // }
 
   async handleScroll() {
     let d = document.documentElement;
@@ -128,7 +134,10 @@ class ProductGrid extends Component {
               onSearch(e.target.value);
             }}
           />
-          <IconButton onClick={this.resetSearch.bind(this)}>
+          <IconButton
+            onClick={this.resetSearch.bind(this)}
+            disabled={!this.state.searchString}
+          >
             <CloseIcon color={red500} />
           </IconButton>
         </div>
