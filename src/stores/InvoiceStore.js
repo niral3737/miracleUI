@@ -1,6 +1,9 @@
 import { observable, action, runInAction } from "mobx";
 import axios from "axios";
 
+const PAGE_SIZE = 50;
+const INITIAL_PAGING_OFFSET_INVOICE_ID = 0;
+
 class InvoiceStore {
   @observable invoiceList = null;
   @observable modal = false;
