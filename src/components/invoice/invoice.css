@@ -1,0 +1,55 @@
+.invoiceEditBody {
+  display: flex;
+  flex-direction: column;
+}
+.invoiceEditBody > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.invoiceEditBody > h4 {
+  font-weight: 400;
+  align-self: flex-start;
+  color: rgb(22, 22, 22);
+  margin-bottom: 0;
+  margin-left: 1rem;
+}
+
+.invoiceEditBody > div > div {
+  margin: 0 3rem;
+}
+
+.errorMessage {
+  margin-left: 5.5rem;
+  margin-top: 2rem;
+  color: red;
+}
+
+.invoice-grid {
+  display: flex;
+  flex-direction: column;
+  margin: 0 2rem;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.search-text-field {
+  flex: 1;
+}
+
+.close-icon {
+  color: red;
+}
+
+.loading-data {
+  margin: 1rem auto;
+  display: block !important;
+}

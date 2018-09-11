@@ -8,19 +8,27 @@ const PAGE_SIZE = 50;
 const INITIAL_PAGING_OFFSET_CUSTOMER_ID = 0;
 
 class CustomerStore {
-  @observable loading = false;
-  @observable loadingMoreData = false;
-  @observable customerList = [];
-  @observable modal = false;
-  @observable selectedCustomer = null;
-  @observable editForm = this.setNewForm();
-  @observable customerFilter = this.setNewCustomerFilter();
-  @observable showDeleteConfirmation = false;
-  @observable searchString = "";
+  @observable
+  loading = false;
+  @observable
+  loadingMoreData = false;
+  @observable
+  customerList = [];
+  @observable
+  modal = false;
+  @observable
+  selectedCustomer = null;
+  @observable
+  editForm = this.setNewForm();
+  @observable
+  customerFilter = this.setNewCustomerFilter();
+  @observable
+  showDeleteConfirmation = false;
+  @observable
+  searchString = "";
 
   @action
   onFieldChange = (field, value) => {
-    console.log(field, value);
     this.editForm.fields[field].value = value;
     let { name, address, phoneNumber } = this.editForm.fields;
     var validation = new Validator(

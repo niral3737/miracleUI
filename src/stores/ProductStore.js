@@ -8,19 +8,27 @@ const PAGE_SIZE = 50;
 const INITIAL_PAGING_OFFSET_PRODUCT_ID = 0;
 
 class ProductStore {
-  @observable loading = false;
-  @observable loadingMoreData = false;
-  @observable productList = [];
-  @observable modal = false;
-  @observable selectedProduct = null;
-  @observable editForm = this.setNewForm();
-  @observable productFilter = this.setNewProductFilter();
-  @observable showDeleteConfirmation = false;
-  @observable searchString = "";
+  @observable
+  loading = false;
+  @observable
+  loadingMoreData = false;
+  @observable
+  productList = [];
+  @observable
+  modal = false;
+  @observable
+  selectedProduct = null;
+  @observable
+  editForm = this.setNewForm();
+  @observable
+  productFilter = this.setNewProductFilter();
+  @observable
+  showDeleteConfirmation = false;
+  @observable
+  searchString = "";
 
   @action
   onFieldChange = (field, value) => {
-    console.log(field, value);
     this.editForm.fields[field].value = value;
     let {
       name,
